@@ -1,9 +1,11 @@
+var vlayerFlag = false;
 /* 지도의 클릭이벤트 설정 */
 map.on('singleclick', function(evt) {
 	let pixel = evt.pixel;
 	//v월드레이어 선택시
 	map.getLayers().forEach(function(layer){
 		if(layer.get("name")=="wms_theme"){
+			vlayerFlag = true;
 			let selectlayer = layer.get("id")
 			if(selectlayer.indexOf(",") >-1){
 				selectlayer = selectlayer.split(",")[0]; //data API는 레이어 1개씩 조회가 가능해서 2개이상이 입력될경우 변경되도록 설정(지적도)
@@ -36,7 +38,7 @@ map.on('singleclick', function(evt) {
 		    				map.removeLayer(ollayer);//기존결과 삭제
 		    			}
 		    		})
-					
+				
 		    	    let vector_layer = new ol.layer.Vector({
 						source: vectorSource,
 						style: vectorStyle
@@ -66,12 +68,15 @@ map.on('singleclick', function(evt) {
 						}
 		    	 	}
 		    	},
-		    	
 		    	error: function(xhr, stat, err) {}
 		    });
-		    
 		}else{
+			vlayerFlag = false;
+		}
+		//자체레이어선택
+		if(vlayerFlag = false){
 			// v월드레이어가 아니면
+			console.log('내부레이어 클릭');
 			// 마커선택부분
 			var feature = map.forEachFeatureAtPixel(evt.pixel, function (feature) {
 				return feature;
@@ -79,7 +84,6 @@ map.on('singleclick', function(evt) {
 			if (feature) {
 				var coordinates = feature.getGeometry().getCoordinates();
 				popup.setPosition(coordinates);
-			
 				$(div_Popup).popover({
 				placement: 'top',
 				html: true,
@@ -89,7 +93,6 @@ map.on('singleclick', function(evt) {
 			} else {
 				$(div_Popup).popover('dispose');
 			}
-	
 			/*
 			[
 				text/plain, 
@@ -110,15 +113,12 @@ map.on('singleclick', function(evt) {
 			);
 			if (clickFeatures) {
 				console.log(clickFeatures);
-	
-				
-		
 				$.ajax({
 					type: "GET", 
 					url : clickFeatures,
 					//data : '',
 					cache:false,
-					dataType:'json',
+					//dataType:'json',
 					success : function(result){
 						var resultInner = `<table><tbody><td>${result}</td></tbody></table>`;
 						
@@ -127,11 +127,7 @@ map.on('singleclick', function(evt) {
 						$('#resultP').html(resultInner);
 					},		
 				});
-	
-			}
-
+			}		
 		}
     });
-
-
  }); // 지도 클릭이벤트 설정 종료
